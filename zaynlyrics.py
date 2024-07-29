@@ -13,12 +13,11 @@ POSTED_LYRICS_FILE = 'posted_lyrics.txt'
 
 
 # Replace these values with your Twitter API credentials
-API_KEY = 'QNwvyYaBHY1nZ6JQZrOFNwbJB'
-API_SECRET_KEY = 'T6wvHiyjuUi3pr4IomLCAjVZNQhKjXeqGsUVw1AFepJ6eJdJiX'
-ACCESS_TOKEN = '1698957609204662272-gtBPnsEmoeCKFW2FyR3xBc7Ssaedql'
-ACCESS_TOKEN_SECRET = '0NCLCPBL4L3qZ2hzjmCFf1V9eWizsuTvaTGLUSRP3gNCw'
-BEARER_TOKEN = 'AAAAAAAAAAAAAAAAAAAAAH7KuwEAAAAAqog8WCTYoz4JTat1FL1%2BGBVpiCs%3Dr8eClhSxlIH6AkGbGsVLKJFQvmXJF3FGRT665XneADheplygVO'  # Required for API v2
-
+BEARER_TOKEN = os.getenv('BEARER_TOKEN')
+API_KEY = os.getenv('API_KEY')
+API_SECRET_KEY = os.getenv('API_SECRET_KEY')
+ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
+ACCESS_TOKEN_SECRET = os.getenv('ACCESS_TOKEN_SECRET')
 
 # Lyrics of the song (replace with your favorite artist's song lyrics)
 
@@ -765,7 +764,6 @@ lyrics5=[
 
 all_lyrics_sets = [lyrics1, lyrics2, lyrics3, lyrics4, lyrics5]
 
-
 def load_posted_lyrics():
     if os.path.exists(POSTED_LYRICS_FILE):
         with open(POSTED_LYRICS_FILE, 'r') as file:
@@ -791,14 +789,14 @@ def tweet_lyric(client, posted_lyrics, current_set_index):
     lyrics_set = all_lyrics_sets[current_set_index]
     remaining_lyrics = [lyric for lyric in lyrics_set if lyric not in posted_lyrics]
     print(f"Remaining lyrics in set {current_set_index + 1}: {remaining_lyrics}")
-    
+
     if not remaining_lyrics:
         print(f"All lyrics from set {current_set_index + 1} have been posted.")
         return False  # Move to the next set if all lyrics from the current set have been posted
 
     lyric_to_post = random.choice(remaining_lyrics)
     print(f"Lyric to post from set {current_set_index + 1}: {lyric_to_post}")
-    
+
     try:
         response = client.create_tweet(text=lyric_to_post)
         if response and response.data and response.data.get('id'):
