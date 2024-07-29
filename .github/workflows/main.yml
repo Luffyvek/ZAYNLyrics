@@ -1,31 +1,44 @@
-name: Run Bot
+name: Tweet Random Lyric
 
 on:
- schedule:
-    - cron: '0 */8 * * *'  # Every 8 hours
-    
+  schedule:
+    - cron: '0 */7 * * *'  # Every 6 hours
+
 jobs:
-  run-bot:
+  tweet-lyric:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
-          python-version: '3.x'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install tweepy
 
-      - name: Run bot
-        run: python zaynlyrics.py
+      - name: Download posted lyrics artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: posted-lyrics
+        continue-on-error: true
+
+      - name: Run the tweet script
+        run: |
+          python zaynlyrics.py
         env:
+          BEARER_TOKEN: ${{ secrets.BEARER_TOKEN }}
           API_KEY: ${{ secrets.API_KEY }}
           API_SECRET_KEY: ${{ secrets.API_SECRET_KEY }}
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+
+      - name: Upload posted lyrics artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: posted-lyrics
+          path: posted_lyrics.txt
