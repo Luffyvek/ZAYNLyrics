@@ -15,11 +15,11 @@ POSTED_LYRICS_FILE = 'posted_lyrics.txt'
 
 
 # Replace these values with your Twitter API credentials
-API_KEY = os.getenv('TWITTER_API_KEY')
-API_SECRET_KEY = os.getenv('TWITTER_API_SECRET_KEY')
-ACCESS_TOKEN = os.getenv('TWITTER_ACCESS_TOKEN')
-ACCESS_TOKEN_SECRET = os.getenv('TWITTER_ACCESS_TOKEN_SECRET')
-BEARER_TOKEN = os.getenv('TWITTER_BEARER_TOKEN')
+API_KEY = os.getenv('API_KEY')
+API_SECRET_KEY = os.getenv('API_SECRET_KEY')
+ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
+ACCESS_TOKEN_SECRET = os.getenv('ACCESS_TOKEN_SECRET')
+BEARER_TOKEN = os.getenv('BEARER_TOKEN')
 
 # Lyrics of the song (replace with your favorite artist's song lyrics)
 lyrics = [
