@@ -828,11 +828,5 @@ def main():
             current_set_index = (current_set_index + 1) % len(all_lyrics_sets)
             continue  # Immediately check the next set without waiting
 
-        next_tweet_time = datetime.now() + timedelta(hours=6)
-        print(f"Time for a new tweet is at {next_tweet_time.strftime('%Y-%m-%d %H:%M:%S')}")
-
-        # Wait 6 hours before posting the next lyric
-        time.sleep(6 * 3600)
-
 if __name__ == "__main__":
     main()
