@@ -787,30 +787,34 @@ def authenticate():
     return client
 
 def tweet_lyric(client, posted_lyrics, current_set_index):
-    lyrics_set = all_lyrics_sets[current_set_index]
-    remaining_lyrics = [lyric for lyric in lyrics_set if lyric not in posted_lyrics]
-    print(f"Remaining lyrics in set {current_set_index + 1}: {remaining_lyrics}")
+    total_sets = len(all_lyrics_sets)
+    for _ in range(total_sets):
+        lyrics_set = all_lyrics_sets[current_set_index]
+        remaining_lyrics = [lyric for lyric in lyrics_set if lyric not in posted_lyrics]
+        print(f"Remaining lyrics in set {current_set_index + 1}: {remaining_lyrics}")
 
-    if not remaining_lyrics:
-        print(f"All lyrics from set {current_set_index + 1} have been posted.")
-        return False  # Move to the next set if all lyrics from the current set have been posted
+        if remaining_lyrics:
+            lyric_to_post = random.choice(remaining_lyrics)
+            print(f"Lyric to post from set {current_set_index + 1}: {lyric_to_post}")
 
-    lyric_to_post = random.choice(remaining_lyrics)
-    print(f"Lyric to post from set {current_set_index + 1}: {lyric_to_post}")
+            try:
+                response = client.create_tweet(text=lyric_to_post)
+                if response and response.data and response.data.get('id'):
+                    print(f"Successfully posted: {lyric_to_post}")
+                    save_posted_lyrics(lyric_to_post)
+                    posted_lyrics.add(lyric_to_post)  # Add the lyric to the posted_lyrics set
+                    return True
+                else:
+                    print(f"Failed to post the lyric: {lyric_to_post}. Response: {response}")
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                return False
 
-    try:
-        response = client.create_tweet(text=lyric_to_post)
-        if response and response.data and response.data.get('id'):
-            print(f"Successfully posted: {lyric_to_post}")
-            save_posted_lyrics(lyric_to_post)
-            posted_lyrics.add(lyric_to_post)  # Add the lyric to the posted_lyrics set
-            return True
-        else:
-            print(f"Failed to post the lyric: {lyric_to_post}. Response: {response}")
-            return False  # Move to the next set if posting fails
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return False
+        # Move to the next set if all lyrics from the current set have been posted
+        current_set_index = (current_set_index + 1) % total_sets
+
+    print("All lyrics from all sets have been posted.")
+    return False
 
 def check_env_variables():
     env_vars = [BEARER_TOKEN, API_KEY, API_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_SECRET]
