@@ -1,0 +1,50 @@
+name: Tweet Random Lyric
+
+on:
+  schedule:
+    - cron: '0 */7 * * *'  # Every 6 hours
+
+jobs:
+  tweet-lyric:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install tweepy
+
+      - name: Download posted lyrics artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: posted-lyrics
+        continue-on-error: true
+
+      - name: Run the tweet script
+        run: |
+          python zaynlyrics.py
+        env:
+          BEARER_TOKEN: ${{ secrets.BEARER_TOKEN }}
+          API_KEY: ${{ secrets.API_KEY }}
+          API_SECRET_KEY: ${{ secrets.API_SECRET_KEY }}
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+
+      - name: Upload posted lyrics artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: posted-lyrics
+          path: posted_lyrics.txt
+
+      - name: Upload current set index artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: current-set-index
+          path: current_set_index.txt
