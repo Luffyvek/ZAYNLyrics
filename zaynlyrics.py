@@ -842,6 +842,5 @@ def main():
         if not success:
                 current_set_index = (current_set_index % (len(all_lyrics_sets) - 1)) + 1
          save_current_set_index(current_set_index)
-
 if __name__ == "__main__":
     main()
