@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 
 # File to keep track of posted lyrics
 POSTED_LYRICS_FILE = 'posted_lyrics.txt'
+CURRENT_SET_INDEX_FILE = 'current_set_index.txt'
 
 
 # Replace these values with your Twitter API credentials
@@ -816,17 +817,27 @@ def check_env_variables():
     if not all(env_vars):
         raise EnvironmentError("One or more environment variables are not set.")
 
+def load_current_set_index():
+    if os.path.exists(CURRENT_SET_INDEX_FILE):
+        with open(CURRENT_SET_INDEX_FILE, 'r') as file:
+            return int(file.read().strip())
+    return 1  # Start with the first set (excluding lyrics1)
+
+def save_current_set_index(current_set_index):
+    with open(CURRENT_SET_INDEX_FILE, 'w') as file:
+        file.write(str(current_set_index))
+
 def main():
     check_env_variables()
     client = authenticate()
     posted_lyrics = load_posted_lyrics()
-    current_set_index = 0
+    current_set_index = load_current_set_index()
 
     while True:
         success = tweet_lyric(client, posted_lyrics, current_set_index)
         if not success:
-            current_set_index = (current_set_index + 1) % len(all_lyrics_sets)
-            continue  # Immediately check the next set without waiting
+                current_set_index = (current_set_index % (len(all_lyrics_sets) - 1)) + 1
+         save_current_set_index(current_set_index)
 
 if __name__ == "__main__":
     main()
