@@ -779,11 +779,11 @@ def save_posted_lyrics(lyric):
     print(f"Saved lyric: {lyric}")
 
 def authenticate():
-    client = tweepy.Client(bearer_token=BEARER_TOKEN,
-                           consumer_key=API_KEY,
-                           consumer_secret=API_SECRET_KEY,
-                           access_token=ACCESS_TOKEN,
-                           access_token_secret=ACCESS_TOKEN_SECRET)
+    client = tweepy.Client(bearer_token=os.getenv('BEARER_TOKEN'),
+                           consumer_key=os.getenv('API_KEY'),
+                           consumer_secret=os.getenv('API_SECRET_KEY'),
+                           access_token=os.getenv('ACCESS_TOKEN'),
+                           access_token_secret=os.getenv('ACCESS_TOKEN_SECRET'))
     return client
 
 def tweet_lyric(client, posted_lyrics, current_set_index):
@@ -817,15 +817,16 @@ def tweet_lyric(client, posted_lyrics, current_set_index):
     return False
 
 def check_env_variables():
-    env_vars = [BEARER_TOKEN, API_KEY, API_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_SECRET]
-    if not all(env_vars):
-        raise EnvironmentError("One or more environment variables are not set.")
+    env_vars = ['BEARER_TOKEN', 'API_KEY', 'API_SECRET_KEY', 'ACCESS_TOKEN', 'ACCESS_TOKEN_SECRET']
+    missing_vars = [var for var in env_vars if not os.getenv(var)]
+    if missing_vars:
+        raise EnvironmentError(f"The following environment variables are not set: {', '.join(missing_vars)}")
 
 def load_current_set_index():
     if os.path.exists(CURRENT_SET_INDEX_FILE):
         with open(CURRENT_SET_INDEX_FILE, 'r') as file:
             return int(file.read().strip())
-    return 1  # Start with the first set (excluding lyrics1)
+    return 0  # Start with the first set
 
 def save_current_set_index(current_set_index):
     with open(CURRENT_SET_INDEX_FILE, 'w') as file:
@@ -837,11 +838,10 @@ def main():
     posted_lyrics = load_posted_lyrics()
     current_set_index = load_current_set_index()
 
-    while True:
-        success = tweet_lyric(client, posted_lyrics, current_set_index)
-        if not success:
-                current_set_index = (current_set_index % (len(all_lyrics_sets) - 1)) + 1
-        save_current_set_index(current_set_index)
+    success = tweet_lyric(client, posted_lyrics, current_set_index)
+    if not success:
+        current_set_index = (current_set_index + 1) % len(all_lyrics_sets)
+    save_current_set_index(current_set_index)
 
 if __name__ == "__main__":
     main()
