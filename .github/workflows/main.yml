@@ -42,3 +42,9 @@ jobs:
         with:
           name: posted-lyrics
           path: posted_lyrics.txt
+
+      - name: Upload current set index artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: current-set-index
+          path: current_set_index.txt
