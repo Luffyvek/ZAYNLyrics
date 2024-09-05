@@ -783,16 +783,6 @@ def tweet_lyric(client, posted_lyrics):
         print(f"Error posting lyric: {e}")
         return False
 
-# Function to wait for the next tweet interval (6 hours)
-def countdown_timer(seconds):
-    while seconds:
-        mins, secs = divmod(seconds, 60)
-        hours, mins = divmod(mins, 60)
-        timeformat = f"{hours:02}:{mins:02}:{secs:02}"
-        print(f"Next tweet in {timeformat}", end='\r')
-        time.sleep(1)
-        seconds -= 1
-
 # Main function
 def main():
     client = authenticate()
