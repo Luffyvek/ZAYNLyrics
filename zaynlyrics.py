@@ -1,34 +1,21 @@
-#!/usr/bin/env python3
 import tweepy
 import random
 import time
 import os
-import ast
 from datetime import datetime, timedelta
-
-
 
 # File to keep track of posted lyrics
 POSTED_LYRICS_FILE = 'posted_lyrics.txt'
-CURRENT_SET_INDEX_FILE = 'current_set_index.txt'
-
 
 # Replace these values with your Twitter API credentials
-BEARER_TOKEN = os.getenv('BEARER_TOKEN')
-API_KEY = os.getenv('API_KEY')
-API_SECRET_KEY = os.getenv('API_SECRET_KEY')
-ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
-ACCESS_TOKEN_SECRET = os.getenv('ACCESS_TOKEN_SECRET')
-
-# Lyrics of the song (replace with your favorite artist's song lyrics)
+API_KEY = '3R8iAL9UZy6joaGvJmpAsj0Um'
+API_SECRET_KEY = 'hkBJUp3HfjxOWxXZeJHhBMn5HPuemoS12S0u0GqUkT6h1jTVev'
+ACCESS_TOKEN = '1698957609204662272-gtBPnsEmoeCKFW2FyR3xBc7Ssaedql'
+ACCESS_TOKEN_SECRET = '0NCLCPBL4L3qZ2hzjmCFf1V9eWizsuTvaTGLUSRP3gNCw'
+BEARER_TOKEN = 'AAAAAAAAAAAAAAAAAAAAAH7KuwEAAAAAqog8WCTYoz4JTat1FL1%2BGBVpiCs%3Dr8eClhSxlIH6AkGbGsVLKJFQvmXJF3FGRT665XneADheplygVO'  # Required for API v2
 
 #MoM
-lyrics1 = [
-        
-    ]
-
-#ICARUS FALLS
-lyrics2= [
+lyrics = [
         #Let Me
         "Sweet baby, our sex has meaning",
         "Baby, let me be your man, so I can love you",
@@ -358,11 +345,6 @@ lyrics2= [
         "That smile gon' take you places",
         "This could be something if you let it be something, don't scare me away",
 
-        
-    ]
-
-#NIL
-lyrics3=[
         #Calamity
         "Nostalgia what a funny feelin'",
         "I feel depleted from feelings I've been revealin'",
@@ -561,10 +543,6 @@ lyrics3=[
         "We don't define each other, stand on your own, be a pillar, lay on my pillow",
         "We don't define each other, stand on your own, be a pillar, lay on my pillow\nCall you my lover, drinks to my liver, I cried now a river full of tears",
         
-    ]
-
-#RUTS
-lyrics4=[
         #Dreamin
         "One, two, three, go",
         "Yeah, I'm dreamin' my life away",
@@ -738,13 +716,6 @@ lyrics4=[
         "I gotta love this feelin' to keep myself from dreamin' about somethin' else\nYou keep me entertained 'cause I saw the flame, and you still walked through it",
         "I'm tired of the grey, I'm sick of the pain\nI'm tired of the pain, I'm sick of the grey",
 
-    # Add more lyrics here
-
-
-    ]
-
-#singles
-lyrics5=[
         #Dusk Till Dawn
         "Not tryna be indie, not tryna be cool",
         "Not tryna be indie, not tryna be cool. Just tryna be in this, tell me, are you too?",
@@ -763,8 +734,7 @@ lyrics5=[
 
     ]
 
-all_lyrics_sets = [lyrics1, lyrics2, lyrics3, lyrics4, lyrics5]
-
+# Function to load posted lyrics from a file
 def load_posted_lyrics():
     if os.path.exists(POSTED_LYRICS_FILE):
         with open(POSTED_LYRICS_FILE, 'r') as file:
@@ -773,75 +743,67 @@ def load_posted_lyrics():
             return posted_lyrics
     return set()
 
+# Function to save posted lyrics to a file
 def save_posted_lyrics(lyric):
     with open(POSTED_LYRICS_FILE, 'a') as file:
         file.write(f"{lyric.replace('\n', '<newline>')}\n")
     print(f"Saved lyric: {lyric}")
 
+# Function to authenticate to Twitter using API v2
 def authenticate():
-    client = tweepy.Client(bearer_token=os.getenv('BEARER_TOKEN'),
-                           consumer_key=os.getenv('API_KEY'),
-                           consumer_secret=os.getenv('API_SECRET_KEY'),
-                           access_token=os.getenv('ACCESS_TOKEN'),
-                           access_token_secret=os.getenv('ACCESS_TOKEN_SECRET'))
+    client = tweepy.Client(bearer_token=BEARER_TOKEN,
+                           consumer_key=API_KEY,
+                           consumer_secret=API_SECRET_KEY,
+                           access_token=ACCESS_TOKEN,
+                           access_token_secret=ACCESS_TOKEN_SECRET)
     return client
 
-def tweet_lyric(client, posted_lyrics, current_set_index):
-    total_sets = len(all_lyrics_sets)
-    for _ in range(total_sets):
-        lyrics_set = all_lyrics_sets[current_set_index]
-        remaining_lyrics = [lyric for lyric in lyrics_set if lyric not in posted_lyrics]
-        print(f"Remaining lyrics in set {current_set_index + 1}: {remaining_lyrics}")
+# Function to tweet a random lyric, ensuring no duplicates
+def tweet_lyric(client, posted_lyrics):
+    remaining_lyrics = [lyric for lyric in lyrics if lyric not in posted_lyrics]
+    if not remaining_lyrics:
+        print("All lyrics have been posted. Exiting.")
+        return False  # Stop the script if all lyrics have been posted
 
-        if remaining_lyrics:
-            lyric_to_post = random.choice(remaining_lyrics)
-            print(f"Lyric to post from set {current_set_index + 1}: {lyric_to_post}")
+    lyric_to_post = random.choice(remaining_lyrics)
+    print(f"Attempting to post lyric: {lyric_to_post}")
 
-            try:
-                response = client.create_tweet(text=lyric_to_post)
-                if response and response.data and response.data.get('id'):
-                    print(f"Successfully posted: {lyric_to_post}")
-                    save_posted_lyrics(lyric_to_post)
-                    posted_lyrics.add(lyric_to_post)  # Add the lyric to the posted_lyrics set
-                    return True
-                else:
-                    print(f"Failed to post the lyric: {lyric_to_post}. Response: {response}")
-            except Exception as e:
-                print(f"An error occurred: {e}")
-                return False
+    # Post the lyric
+    try:
+        response = client.create_tweet(text=lyric_to_post)
+        if response and response.data and response.data.get('id'):
+            print(f"Successfully posted: {lyric_to_post}")
+            save_posted_lyrics(lyric_to_post)
+            posted_lyrics.add(lyric_to_post)  # Add the lyric to the posted_lyrics set
+            return True
+        else:
+            print(f"Failed to post the lyric: {lyric_to_post}. Response: {response}")
+            return False
+    except Exception as e:
+        print(f"Error posting lyric: {e}")
+        return False
 
-        # Move to the next set if all lyrics from the current set have been posted
-        current_set_index = (current_set_index + 1) % total_sets
+# Function to wait for the next tweet interval (6 hours)
+def countdown_timer(seconds):
+    while seconds:
+        mins, secs = divmod(seconds, 60)
+        hours, mins = divmod(mins, 60)
+        timeformat = f"{hours:02}:{mins:02}:{secs:02}"
+        print(f"Next tweet in {timeformat}", end='\r')
+        time.sleep(1)
+        seconds -= 1
 
-    print("All lyrics from all sets have been posted.")
-    return False
-
-def check_env_variables():
-    env_vars = ['BEARER_TOKEN', 'API_KEY', 'API_SECRET_KEY', 'ACCESS_TOKEN', 'ACCESS_TOKEN_SECRET']
-    missing_vars = [var for var in env_vars if not os.getenv(var)]
-    if missing_vars:
-        raise EnvironmentError(f"The following environment variables are not set: {', '.join(missing_vars)}")
-
-def load_current_set_index():
-    if os.path.exists(CURRENT_SET_INDEX_FILE):
-        with open(CURRENT_SET_INDEX_FILE, 'r') as file:
-            return int(file.read().strip())
-    return 0  # Start with the first set
-
-def save_current_set_index(current_set_index):
-    with open(CURRENT_SET_INDEX_FILE, 'w') as file:
-        file.write(str(current_set_index))
-
+# Main function
 def main():
-    check_env_variables()
     client = authenticate()
     posted_lyrics = load_posted_lyrics()
-    current_set_index = load_current_set_index()
 
-    success = tweet_lyric(client, posted_lyrics, current_set_index)
-    if not success:
-        current_set_index = (current_set_index + 1) % len(all_lyrics_sets)
-    save_current_set_index(current_set_index)
+    while tweet_lyric(client, posted_lyrics):
+        next_tweet_time = datetime.now() + timedelta(hours=6)
+        print(f"\nNext tweet scheduled at {next_tweet_time.strftime('%Y-%m-%d %H:%M:%S')}")
+        
+        # Wait 6 hours before posting the next lyric
+        countdown_timer(6 * 3600)
 
 if __name__ == "__main__":
     main()
